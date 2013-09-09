@@ -16,6 +16,8 @@ def pjax(pjax_template=None):
                     resp.template_name = pjax_template
                 else:
                     resp.template_name = _pjaxify_template_var(resp.template_name)
+            # set a PJAX header for redirections
+            resp['X-PJAX-URL'] = request.path
             return resp
         return _view
     return pjax_decorator
@@ -36,6 +38,8 @@ def pjaxtend(parent='base.html', pjax_parent='pjax.html', context_var='parent'):
                     resp.context_data[context_var] = parent
             except AttributeError:
                 pass
+            # set a PJAX header for redirections
+            resp['X-PJAX-URL'] = request.path
             return resp
         return _view
     return pjaxtend_decorator
