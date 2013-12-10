@@ -1,3 +1,6 @@
+import urlparse
+from urllib import urlencode
+
 import functools
 
 from django.views.generic.base import TemplateResponseMixin
@@ -17,7 +20,13 @@ def pjax(pjax_template=None):
                 else:
                     resp.template_name = _pjaxify_template_var(resp.template_name)
             # set a PJAX header for redirections
-            resp['X-PJAX-URL'] = request.path
+            url = request.get_full_path()
+            u = urlparse.urlparse(url)
+            query = urlparse.parse_qs(u.query)
+            query.pop('q2', None)
+            u = u._replace(query=urlencode(query, True))
+
+            resp['X-PJAX-URL'] = urlparse.urlunparse(u)
             return resp
         return _view
     return pjax_decorator
@@ -39,7 +48,13 @@ def pjaxtend(parent='base.html', pjax_parent='pjax.html', context_var='parent'):
             except AttributeError:
                 pass
             # set a PJAX header for redirections
-            resp['X-PJAX-URL'] = request.path
+            url = request.get_full_path()
+            u = urlparse.urlparse(url)
+            query = urlparse.parse_qs(u.query)
+            query.pop('_pjax', None)
+            u = u._replace(query=urlencode(query, True))
+
+            resp['X-PJAX-URL'] = urlparse.urlunparse(u)
             return resp
         return _view
     return pjaxtend_decorator
