@@ -23,8 +23,14 @@ def pjax(pjax_template=None):
             url = request.get_full_path()
             u = urlparse.urlparse(url)
             query = urlparse.parse_qs(u.query)
-            query.pop('q2', None)
-            u = u._replace(query=urlencode(query, True))
+            query.pop('_pjax', None)
+            # encode the strings
+            query_elems = {}
+            for k, v in query.items():
+                v = [vv.encode('utf-8') for vv in v]
+                query_elems[k] = v
+
+            u = u._replace(query=urlencode(query_elems, True))
 
             resp['X-PJAX-URL'] = urlparse.urlunparse(u)
             return resp
@@ -52,7 +58,14 @@ def pjaxtend(parent='base.html', pjax_parent='pjax.html', context_var='parent'):
             u = urlparse.urlparse(url)
             query = urlparse.parse_qs(u.query)
             query.pop('_pjax', None)
-            u = u._replace(query=urlencode(query, True))
+
+            # encode the strings
+            query_elems = {}
+            for k, v in query.items():
+                v = [vv.encode('utf-8') for vv in v]
+                query_elems[k] = v
+
+            u = u._replace(query=urlencode(query_elems, True))
 
             resp['X-PJAX-URL'] = urlparse.urlunparse(u)
             return resp
